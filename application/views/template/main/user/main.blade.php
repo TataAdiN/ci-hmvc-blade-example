@@ -13,7 +13,7 @@
   <!-- PANGGIL UNTUK INJEK CSS KE TEMPAT INI -->
 </head>
 
-<body class="hold-transition layout-top-nav">
+<body class="hold-transition text-sm layout-top-nav">
   <div class="wrapper">
     <nav class="main-header navbar navbar-expand-md navbar-light navbar-white">
       <div class="container">
