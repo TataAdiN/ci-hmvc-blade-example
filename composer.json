@@ -1,17 +1,26 @@
 {
-	"description": "The CodeIgniter framework with HMVC Library",
-	"name": "alzen8work/ci_hmvc",
+	"description": "The CodeIgniter framework",
+	"name": "codeigniter/framework",
 	"type": "project",
-	"homepage": "https://github.com/alzen8work/ci_hmvc",
+	"homepage": "https://codeigniter.com",
 	"license": "MIT",
-	"require": {
-		"php": ">=5.2.4"
+	"support": {
+		"forum": "http://forum.codeigniter.com/",
+		"wiki": "https://github.com/bcit-ci/CodeIgniter/wiki",
+		"slack": "https://codeigniterchat.slack.com",
+		"source": "https://github.com/bcit-ci/CodeIgniter"
 	},
-	"suggest": {
-		"paragonie/random_compat": "Provides better randomness in PHP 5.x"
-	},
-	"require-dev": {
-		"mikey179/vfsStream": "1.1.*",
-		"phpunit/phpunit": "4.* || 5.*"
-	}
+    "require": {
+        "php": "8.0.*"
+    },
+    "scripts": {
+        "test:coverage": [
+            "@putenv XDEBUG_MODE=coverage",
+            "phpunit --color=always --coverage-text --configuration tests/travis/sqlite.phpunit.xml"
+        ]
+    },
+    "require-dev": {
+        "mikey179/vfsstream": "^1.6",
+        "phpunit/phpunit": "^9.6"
+    }
 }
