@@ -1,4 +1,5 @@
-<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php if (!defined('BASEPATH'))
+    exit('No direct script access allowed');
 
 /**
  * This class is a port of Laravel's blade templating system.
@@ -35,6 +36,14 @@ class Blade
         'layouts',
         'section_start',
         'section_end',
+        'push',
+        'prepend',
+        'endpush',
+        'endprepend',
+        'stack',
+        'checked',
+        'selected',
+        'disabled',
         'yields',
         'yield_sections'
     );
@@ -52,6 +61,20 @@ class Blade
      * @var array
      */
     protected $_sections = array();
+
+    /**
+     * Array of push stacks content
+     *
+     * @var array
+     */
+    protected $_pushes = array();
+
+    /**
+     * Stack of current push buffers
+     *
+     * @var array
+     */
+    protected $_last_push = array();
 
     /**
      * An array of user defined compilers.
@@ -96,12 +119,11 @@ class Blade
 
     public function __get($name)
     {
-        if (key_exists($name, $this->_data))
-        {
+        if (key_exists($name, $this->_data)) {
             return $this->_data[$name];
         }
 
-        $_CI = & get_instance();
+        $_CI = &get_instance();
         return $_CI->$name;
     }
 
@@ -136,12 +158,9 @@ class Blade
      */
     public function append($name, $value)
     {
-        if (is_array($this->_data[$name]))
-        {
+        if (is_array($this->_data[$name])) {
             $this->_data[$name][] = $value;
-        }
-        else
-        {
+        } else {
             $this->_data[$name] .= $value;
         }
 
@@ -186,8 +205,7 @@ class Blade
      */
     public function render($template, $data = NULL, $return = FALSE)
     {
-        if (isset($data))
-        {
+        if (isset($data)) {
             $this->set_data($data);
         }
 
@@ -195,8 +213,7 @@ class Blade
         $compiled = $this->_compile($template);
         $content = $this->_run($compiled, $this->_data);
 
-        if ( ! $return)
-        {
+        if (!$return) {
             $this->output->append_output($content);
         }
 
@@ -216,20 +233,17 @@ class Blade
         $full_path = APPPATH . 'views/' . $view . $this->blade_ext;
 
         // Modular Separation / Modular Extensions has been detected
-        if (method_exists($this->router, 'fetch_module'))
-        {
+        if (method_exists($this->router, 'fetch_module')) {
             $module = $this->router->fetch_module();
             list($path, $_view) = Modules::find($view . $this->blade_ext, $module, 'views/');
 
-            if ($path)
-            {
+            if ($path) {
                 $full_path = $path . $_view;
             }
         }
 
         // File not found
-        if ( ! is_file($full_path))
-        {
+        if (!is_file($full_path)) {
             show_error('[Blade] Unable to find view: ' . $view);
         }
 
@@ -250,18 +264,15 @@ class Blade
         $cache_id = 'blade-' . md5($view_path);
 
         // Test if a compiled version exists in the cache
-        if ($compiled = $this->cache->file->get($cache_id))
-        {
+        if ($compiled = $this->cache->file->get($cache_id)) {
             // In production, avoid to test if the template was updated
-            if (ENVIRONMENT == 'production')
-            {
+            if (ENVIRONMENT == 'production') {
                 return $compiled;
             }
-                    
+
             // Return cache version if the template was not updated
             $meta = $this->cache->file->get_metadata($cache_id);
-            if ($meta['mtime'] > filemtime($view_path))
-            {
+            if ($meta['mtime'] > filemtime($view_path)) {
                 return $compiled;
             }
         }
@@ -270,8 +281,7 @@ class Blade
         $template = file_get_contents($view_path);
 
         // Compilers
-        foreach ($this->_compilers as $compiler)
-        {
+        foreach ($this->_compilers as $compiler) {
             $method = "_compile_{$compiler}";
             $template = $this->$method($template);
         }
@@ -293,13 +303,12 @@ class Blade
      */
     protected function _run($template, $data = NULL)
     {
-        if (is_array($data))
-        {
+        if (is_array($data)) {
             extract($data);
         }
 
         ob_start();
-        eval(' ?>' . $template . '<?php ');
+        eval (' ?>' . $template . '<?php ');
         $content = ob_get_clean();
 
         return $content;
@@ -372,12 +381,9 @@ class Blade
      */
     protected function _section_extend($section, $content)
     {
-        if (isset($this->_sections[$section]))
-        {
+        if (isset($this->_sections[$section])) {
             $this->_sections[$section] = str_replace('@parent', $content, $this->_sections[$section]);
-        }
-        else
-        {
+        } else {
             $this->_sections[$section] = $content;
         }
     }
@@ -438,8 +444,7 @@ class Blade
     {
         preg_match_all('/(\s*)@forelse(\s*\(.*\))(\s*)/', $value, $matches);
 
-        foreach ($matches[0] as $forelse)
-        {
+        foreach ($matches[0] as $forelse) {
             preg_match('/\$[^\s]*/', $forelse, $variable);
 
             // Once we have extracted the variable being looped against, we can add
@@ -561,8 +566,7 @@ class Blade
      */
     protected function _compile_extensions($value)
     {
-        foreach ($this->_extensions as $compiler)
-        {
+        foreach ($this->_extensions as $compiler) {
             $value = call_user_func($compiler, $value);
         }
 
@@ -595,8 +599,7 @@ class Blade
         $pattern = $this->matcher('layout');
 
         // Find "@layout" expressions
-        if ( ! preg_match_all($pattern, $value, $matches, PREG_SET_ORDER))
-        {
+        if (!preg_match_all($pattern, $value, $matches, PREG_SET_ORDER)) {
             return $value;
         }
 
@@ -604,8 +607,7 @@ class Blade
         $value = preg_replace($pattern, '', $value);
 
         // Include layouts at the end of template
-        foreach ($matches as $set)
-        {
+        foreach ($matches as $set) {
             $value .= "\n" . $set[1] . '<?php echo $this->_include' . $set[2] . "; ?>\n";
         }
 
@@ -669,10 +671,146 @@ class Blade
         return str_replace('@yield_section', $replace, $value);
     }
 
+    /**
+     * Starts buffering push or prepend content.
+     *
+     * @param  string  $stack
+     * @param  string  $mode
+     */
+    protected function _push_start($stack, $mode = 'append')
+    {
+        array_push($this->_last_push, array($stack, $mode));
+        ob_start();
+    }
+
+    /**
+     * Ends buffering push or prepend content.
+     */
+    protected function _push_end()
+    {
+        list($stack, $mode) = array_pop($this->_last_push);
+        $content = ob_get_clean();
+
+        if (!isset($this->_pushes[$stack])) {
+            $this->_pushes[$stack] = '';
+        }
+
+        if ($mode === 'prepend') {
+            $this->_pushes[$stack] = $content . $this->_pushes[$stack];
+        } else {
+            $this->_pushes[$stack] .= $content;
+        }
+    }
+
+    /**
+     * Returns the contents of a push stack.
+     *
+     * @param  string  $stack
+     * @return string
+     */
+    protected function _get_stack($stack)
+    {
+        return isset($this->_pushes[$stack]) ? $this->_pushes[$stack] : '';
+    }
+
+    /**
+     * Rewrites Blade @push statements into valid PHP.
+     *
+     * @param  string  $value
+     * @return string
+     */
+    protected function _compile_push($value)
+    {
+        $pattern = $this->matcher('push');
+
+        return preg_replace($pattern, '$1<?php $this->_push_start$2; ?>', $value);
+    }
+
+    /**
+     * Rewrites Blade @prepend statements into valid PHP.
+     *
+     * @param  string  $value
+     * @return string
+     */
+    protected function _compile_prepend($value)
+    {
+        $pattern = $this->matcher('prepend');
+
+        return preg_replace($pattern, '$1<?php $this->_push_start$2; ?>', $value);
+    }
+
+    /**
+     * Rewrites Blade @endpush statements into valid PHP.
+     *
+     * @param  string  $value
+     * @return string
+     */
+    protected function _compile_endpush($value)
+    {
+        return str_replace('@endpush', '<?php $this->_push_end(); ?>', $value);
+    }
+
+    /**
+     * Rewrites Blade @endprepend statements into valid PHP.
+     *
+     * @param  string  $value
+     * @return string
+     */
+    protected function _compile_endprepend($value)
+    {
+        return str_replace('@endprepend', '<?php $this->_push_end(); ?>', $value);
+    }
+
+    /**
+     * Rewrites Blade @stack statements into valid PHP.
+     *
+     * @param  string  $value
+     * @return string
+     */
+    protected function _compile_stack($value)
+    {
+        $pattern = $this->matcher('stack');
+
+        return preg_replace($pattern, '$1<?php echo $this->_get_stack$2; ?>', $value);
+    }
+
+    /**
+     * Rewrites Blade @checked statements into valid PHP.
+     *
+     * @param  string  $value
+     * @return string
+     */
+    protected function _compile_checked($value)
+    {
+        $pattern = $this->matcher('checked');
+
+        return preg_replace($pattern, '$1<?php echo ($2) ? \' checked\' : \'\'; ?>', $value);
+    }
+
+    /**
+     * Rewrites Blade @selected statements into valid PHP.
+     *
+     * @param  string  $value
+     * @return string
+     */
+    protected function _compile_selected($value)
+    {
+        $pattern = $this->matcher('selected');
+
+        return preg_replace($pattern, '$1<?php echo ($2) ? \' selected\' : \'\'; ?>', $value);
+    }
+
+    /**
+     * Rewrites Blade @disabled statements into valid PHP.
+     *
+     * @param  string  $value
+     * @return string
+     */
+    protected function _compile_disabled($value)
+    {
+        $pattern = $this->matcher('disabled');
+
+        return preg_replace($pattern, '$1<?php echo ($2) ? \' disabled\' : \'\'; ?>', $value);
+    }
 
 }
-
-
-// END Blade class
-
-/* End of file Blade.php */
