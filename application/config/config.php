@@ -33,7 +33,7 @@ $config["base_url"] = "http://ci-hmvc-blade-example.test/";
 | variable so that it is blank.
 |
 */
-$config["index_page"] = "index.php";
+$config["index_page"] = "";
 
 /*
 |--------------------------------------------------------------------------
