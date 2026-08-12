@@ -9,7 +9,10 @@ class AuthMiddleware extends Middleware
     {
         if ($this->ci->mAuth->guest()) {
             redirect(base_url());
-            //exit;
+            exit;
+        }
+        if (isset($this->ci->blade)) {
+            $this->ci->blade->set('user', $this->ci->mAuth->user());
         }
         if (in_array('admin', $params)) {
             if ($this->ci->mAuth->level() !== 'admin') {
