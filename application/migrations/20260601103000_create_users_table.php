@@ -30,6 +30,10 @@ class Migration_Create_users_table extends CI_Migration
                 "type" => "VARCHAR",
                 "constraint" => "255",
             ],
+            "type" => [
+                "type" => "TINYINT",
+                "default" => 0,
+            ],
             "remember_token" => [
                 "type" => "VARCHAR",
                 "constraint" => "100",
