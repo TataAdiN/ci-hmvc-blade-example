@@ -5,6 +5,7 @@ use Ramsey\Uuid\Uuid;
 
 /**
  * @property CI_DB_query_builder $db
+ * @property CI_Loader $load
  */
 class Seeder extends MY_Controller
 {
