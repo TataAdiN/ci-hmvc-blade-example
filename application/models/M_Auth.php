@@ -101,7 +101,7 @@ class M_Auth extends CI_Model
             $this->sessionKey => $user->id,
             'user_email' => $user->email,
             'user_name' => $user->name,
-            'user_level' => $user->level ?? 'user',
+            'user_level' => $user->type,
             'logged_in' => true,
         ];
 
