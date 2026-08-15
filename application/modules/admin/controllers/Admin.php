@@ -12,7 +12,7 @@ class Admin extends MY_Controller
 	{
 		parent::__construct();
 		$this->load->model("M_Auth", "mAuth");
-		$this->middleware('auth');
+		$this->middleware('auth:admin');
 	}
 
 	public function index()
