@@ -8,7 +8,11 @@ class GuestMiddleware extends Middleware
     public function handle(array $params = [])
     {
         if ($this->ci->mAuth->check()) {
-            redirect(base_url('admin'));
+            if ($this->ci->mAuth->level() == 1) {
+                redirect(base_url('admin'));
+            } else {
+                redirect(base_url('user'));
+            }
             exit;
         }
     }

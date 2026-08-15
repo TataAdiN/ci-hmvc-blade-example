@@ -15,7 +15,7 @@ class AuthMiddleware extends Middleware
             $this->ci->blade->set('user', $this->ci->mAuth->user());
         }
         if (in_array('admin', $params)) {
-            if ($this->ci->mAuth->level() !== 'admin') {
+            if ($this->ci->mAuth->level() != 1) {
                 show_error('Akses Ditolak. Anda bukan Administrator.', 403);
             }
         }
