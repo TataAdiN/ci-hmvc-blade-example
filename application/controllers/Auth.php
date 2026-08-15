@@ -37,7 +37,20 @@ class Auth extends MY_Controller
 
         if ($this->mAuth->attempt($email, $password, $remember)) {
             $this->session->set_flashdata('swal_success', 'Selamat datang kembali, ' . $this->mAuth->name() . '!');
-            redirect('admin');
+
+            $userLevel = $this->mAuth->level();
+
+            switch ($userLevel) {
+                case 0:
+                    redirect('user');
+                    break;
+                case 1:
+                    redirect('admin');
+                    break;
+                default:
+                    show_error("Unknown user data");
+                    break;
+            }
         } else {
             $this->session->set_flashdata('swal_error', 'Email atau password yang Anda masukkan salah.');
             redirect();
